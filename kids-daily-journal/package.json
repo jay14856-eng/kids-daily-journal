@@ -1,0 +1,38 @@
+{
+  "name": "kids-daily-journal",
+  "version": "1.0.0",
+  "description": "A daily journal application for kids to express their thoughts and feelings.",
+  "main": "src/app.ts",
+  "scripts": {
+    "start": "ts-node src/app.ts",
+    "build": "tsc",
+    "serve": "http-server public"
+  },
+  "dependencies": {
+    "typescript": "^4.5.4",
+    "ts-node": "^10.4.0",
+    "http-server": "^0.12.3"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0"
+  },
+  "keywords": [
+    "PWA",
+    "journal",
+    "kids",
+    "daily",
+    "express"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "homepage": "https://github.com/yourusername/kids-daily-journal",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/kids-daily-journal.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/kids-daily-journal/issues"
+  }
+}
