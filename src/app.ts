@@ -1,3 +1,5 @@
+import { createClient } from '@supabase/supabase-js';
+
 type EntrySection = 'feelings' | 'best-moment' | 'thankful' | 'journal' | 'goal' | 'draw';
 type ThemeName = 'sunny' | 'garden' | 'space' | 'castle' | 'jungle' | 'pirate';
 
@@ -14,6 +16,78 @@ type BeforeInstallPromptEvent = Event & {
 };
 
 const STORAGE_KEY = 'kids-daily-journal.entries';
+const DEVICE_ID_KEY = 'kids-daily-journal.device-id';
+const SYNC_KEY_STORAGE = 'kids-daily-journal.sync-key';
+const LAST_SYNC_KEY = 'kids-daily-journal.last-sync';
+
+// Supabase client
+const supabaseUrl = 'https://guhgtuwhnlyfxtlrfjbh.supabase.co';
+const supabaseKey = 'sb_publishable_1iIPQEVSIhKxPeVTZNgqYg_fV2UKUmm';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Device management
+const getOrCreateDeviceId = (): string => {
+  let deviceId = window.localStorage.getItem(DEVICE_ID_KEY);
+  if (!deviceId) {
+    deviceId = `device-${Math.random().toString(36).substr(2, 9)}`;
+    window.localStorage.setItem(DEVICE_ID_KEY, deviceId);
+  }
+  return deviceId;
+};
+
+const getSyncKey = (): string | null => {
+  return window.localStorage.getItem(SYNC_KEY_STORAGE);
+};
+
+const setSyncKey = (key: string): void => {
+  window.localStorage.setItem(SYNC_KEY_STORAGE, key);
+};
+
+// Sync entries to Supabase
+const syncToSupabase = async (entries: JournalEntryRecord[]): Promise<void> => {
+  const syncKey = getSyncKey();
+  if (!syncKey) return;
+
+  try {
+    const { error } = await supabase
+      .from('kids_journal_entries')
+      .upsert(
+        {
+          sync_key: syncKey,
+          entries: entries,
+          updated_at: new Date().toISOString()
+        },
+        { onConflict: 'sync_key' }
+      );
+
+    if (error) throw error;
+    window.localStorage.setItem(LAST_SYNC_KEY, new Date().toISOString());
+  } catch (err) {
+    console.error('Failed to sync to Supabase:', err);
+  }
+};
+
+// Fetch entries from Supabase
+const fetchFromSupabase = async (): Promise<JournalEntryRecord[] | null> => {
+  const syncKey = getSyncKey();
+  if (!syncKey) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from('kids_journal_entries')
+      .select('entries, updated_at')
+      .eq('sync_key', syncKey)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (data && data.entries) {
+      return data.entries as JournalEntryRecord[];
+    }
+  } catch (err) {
+    console.error('Failed to fetch from Supabase:', err);
+  }
+  return null;
+};
 
 const THEME_COPY: Record<ThemeName, { label: string; emoji: string; blurb: string }> = {
   sunny: {
@@ -106,6 +180,10 @@ const readEntries = (): JournalEntryRecord[] => {
 
 const writeEntries = (entries: JournalEntryRecord[]) => {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  // Sync to Supabase in background
+  syncToSupabase(entries).catch(() => {
+    // Silently fail - offline mode is fine
+  });
 };
 
 const getToday = () => new Date().toLocaleDateString(undefined, {
@@ -263,6 +341,34 @@ if (rootElement) {
 
     rootElement.className = `theme-${selectedTheme}`;
 
+    const currentSyncKey = getSyncKey();
+    const deviceId = getOrCreateDeviceId();
+    
+    const deviceLinkingMarkup = currentSyncKey
+      ? `
+        <section class="panel device-panel">
+          <div class="device-header">
+            <span class="device-badge">📱 Connected</span>
+            <button id="unlink-device" class="link-btn" type="button">Unlink device</button>
+          </div>
+          <p class="device-info">Sync key: <code>${escapeHtml(currentSyncKey)}</code></p>
+          <p class="device-hint">Share this code with other devices to sync entries across multiple kids devices!</p>
+        </section>
+      `
+      : `
+        <section class="panel device-panel">
+          <h3>Link a device</h3>
+          <div class="device-link-form">
+            <input type="text" id="sync-key-input" placeholder="Enter sync code or create one" maxlength="20" />
+            <div class="device-link-actions">
+              <button id="create-sync-key" class="primary-btn" type="button">Create new</button>
+              <button id="join-sync-key" class="secondary-btn" type="button">Join device</button>
+            </div>
+          </div>
+          <p class="device-hint">Each device needs a code to share entries. Create one or ask an adult for a code to join!</p>
+        </section>
+      `;
+
     rootElement.innerHTML = `
       <div class="app-shell">
         <header class="topbar">
@@ -273,6 +379,8 @@ if (rootElement) {
           <p class="welcome-tag">Hi, Kiddo!</p>
           <h1>🌞 My Daily Journal</h1>
         </header>
+
+        ${deviceLinkingMarkup}
 
         <section class="panel theme-picker-panel">
           <div class="theme-picker-header">
@@ -300,6 +408,48 @@ if (rootElement) {
       await deferredPrompt.userChoice;
       deferredPrompt = null;
       updateInstallButton();
+    });
+
+    // Device linking
+    const createSyncKeyBtn = document.getElementById('create-sync-key');
+    createSyncKeyBtn?.addEventListener('click', () => {
+      const newSyncKey = Math.random().toString(36).substring(2, 8).toUpperCase();
+      setSyncKey(newSyncKey);
+      // Fetch and sync any existing cloud data for this new key
+      fetchFromSupabase().then(() => render());
+    });
+
+    const joinSyncKeyBtn = document.getElementById('join-sync-key');
+    joinSyncKeyBtn?.addEventListener('click', () => {
+      const input = document.getElementById('sync-key-input') as HTMLInputElement | null;
+      const syncKey = input?.value?.trim().toUpperCase();
+      if (!syncKey || syncKey.length < 4) {
+        alert('Please enter a valid sync code (at least 4 characters)');
+        return;
+      }
+      setSyncKey(syncKey);
+      // Fetch cloud entries for this sync key
+      fetchFromSupabase().then((cloudEntries) => {
+        if (cloudEntries && cloudEntries.length > 0) {
+          const localEntries = readEntries();
+          const merged = [...localEntries];
+          cloudEntries.forEach((cloudEntry) => {
+            if (!merged.find((e) => e.id === cloudEntry.id)) {
+              merged.push(cloudEntry);
+            }
+          });
+          writeEntries(merged);
+        }
+        render();
+      });
+    });
+
+    const unlinkDeviceBtn = document.getElementById('unlink-device');
+    unlinkDeviceBtn?.addEventListener('click', () => {
+      if (confirm('Unlink this device? Your local entries will remain on this device.')) {
+        window.localStorage.removeItem(SYNC_KEY_STORAGE);
+        render();
+      }
     });
 
     const confettiBurst = () => {
@@ -368,6 +518,42 @@ if (rootElement) {
       });
     });
   };
+
+  // Periodic sync when online
+  window.addEventListener('online', () => {
+    updateConnectionStatus();
+    const entries = readEntries();
+    syncToSupabase(entries);
+  });
+
+  window.addEventListener('offline', () => {
+    updateConnectionStatus();
+  });
+
+  // Periodically check for updates (every 30 seconds when online and synced)
+  setInterval(async () => {
+    if (!navigator.onLine || !getSyncKey()) return;
+    
+    const cloudEntries = await fetchFromSupabase();
+    if (!cloudEntries || cloudEntries.length === 0) return;
+    
+    const localEntries = readEntries();
+    let hasNew = false;
+    
+    cloudEntries.forEach((cloudEntry) => {
+      if (!localEntries.find((e) => e.id === cloudEntry.id)) {
+        localEntries.push(cloudEntry);
+        hasNew = true;
+      }
+    });
+    
+    if (hasNew) {
+      writeEntries(localEntries);
+      if (document.visibilityState === 'visible') {
+        render();
+      }
+    }
+  }, 30000);
 
   render();
 }
