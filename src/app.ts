@@ -1,5 +1,5 @@
 type EntrySection = 'feelings' | 'best-moment' | 'thankful' | 'journal' | 'goal' | 'draw';
-type ThemeName = 'sunny' | 'garden' | 'space' | 'castle' | 'jungle';
+type ThemeName = 'sunny' | 'garden' | 'space' | 'castle' | 'jungle' | 'pirate';
 
 type JournalEntryRecord = {
   id: string;
@@ -40,6 +40,11 @@ const THEME_COPY: Record<ThemeName, { label: string; emoji: string; blurb: strin
     label: 'Jungle Journey',
     emoji: '🌴',
     blurb: 'Wild and playful'
+  },
+  pirate: {
+    label: 'Pirate Adventure',
+    emoji: '🏴‍☠️',
+    blurb: 'Treasure hunt fun'
   }
 };
 

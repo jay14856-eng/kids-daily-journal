@@ -136,6 +136,30 @@ textarea {
     --status-offline-text: #a85a45;
 }
 
+#root.theme-pirate {
+    --bg-top: #0d1b2a;
+    --bg-bottom: #1a2332;
+    --panel-bg: rgba(26, 35, 50, 0.85);
+    --heading: #d4a574;
+    --heading-strong: #f4d9b8;
+    --badge: #ff6b35;
+    --card-a: #c9a578;
+    --card-b: #e8c9a0;
+    --card-c: #d4a574;
+    --card-d: #8b7355;
+    --card-e: #b8860b;
+    --card-f: #daa520;
+    --accent: #daa520;
+    --accent-2: #f4a460;
+    --chip: #8b4513;
+    --chip-text: #fff8dc;
+    --secondary-bg: #1a2d3f;
+    --status-bg: #2c3e50;
+    --status-text: #f4d9b8;
+    --status-offline-bg: #3d1f1f;
+    --status-offline-text: #ffd9a8;
+}
+
 .app-shell {
     max-width: 980px;
     margin: 0 auto;
