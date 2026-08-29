@@ -1,4 +1,5 @@
 type EntrySection = 'feelings' | 'best-moment' | 'thankful' | 'journal' | 'goal' | 'draw';
+type ThemeName = 'sunny' | 'garden' | 'space' | 'castle' | 'jungle';
 
 type JournalEntryRecord = {
   id: string;
@@ -13,6 +14,34 @@ type BeforeInstallPromptEvent = Event & {
 };
 
 const STORAGE_KEY = 'kids-daily-journal.entries';
+
+const THEME_COPY: Record<ThemeName, { label: string; emoji: string; blurb: string }> = {
+  sunny: {
+    label: 'Sunny Day',
+    emoji: '☀️',
+    blurb: 'Bright and happy'
+  },
+  garden: {
+    label: 'Rainbow Garden',
+    emoji: '🌼',
+    blurb: 'Blooming colors'
+  },
+  space: {
+    label: 'Space Explorer',
+    emoji: '🚀',
+    blurb: 'Starlight adventure'
+  },
+  castle: {
+    label: 'Princess Castle',
+    emoji: '🏰',
+    blurb: 'Sparkly royal fun'
+  },
+  jungle: {
+    label: 'Jungle Journey',
+    emoji: '🌴',
+    blurb: 'Wild and playful'
+  }
+};
 
 const SECTION_COPY: Record<EntrySection, { label: string; emoji: string; prompt: string; placeholder: string }> = {
   feelings: {
@@ -115,6 +144,7 @@ const rootElement = document.getElementById('root');
 if (rootElement) {
   let entries = readEntries();
   let selectedSection: EntrySection | null = null;
+  let selectedTheme: ThemeName = 'sunny';
   let deferredPrompt: BeforeInstallPromptEvent | null = null;
 
   const updateInstallButton = () => {
@@ -218,6 +248,16 @@ if (rootElement) {
             <button type="button" class="delete-btn" data-entry-id="${entry.id}">Delete</button>
           </li>`).join('')}</ul>`;
 
+    const themeCards = (Object.keys(THEME_COPY) as ThemeName[]).map((themeKey) => `
+      <button type="button" class="theme-card ${selectedTheme === themeKey ? 'active' : ''}" data-theme="${themeKey}">
+        <span class="theme-emoji">${THEME_COPY[themeKey].emoji}</span>
+        <span class="theme-name">${escapeHtml(THEME_COPY[themeKey].label)}</span>
+        <small>${escapeHtml(THEME_COPY[themeKey].blurb)}</small>
+      </button>
+    `).join('');
+
+    rootElement.className = `theme-${selectedTheme}`;
+
     rootElement.innerHTML = `
       <div class="app-shell">
         <header class="topbar">
@@ -228,6 +268,14 @@ if (rootElement) {
           <p class="welcome-tag">Hi, Kiddo!</p>
           <h1>🌞 My Daily Journal</h1>
         </header>
+
+        <section class="panel theme-picker-panel">
+          <div class="theme-picker-header">
+            <h2>Choose your style</h2>
+          </div>
+          <div class="theme-grid">${themeCards}</div>
+        </section>
+
         <main class="content">
           ${rewardMarkup}
           ${formMarkup}
@@ -262,6 +310,15 @@ if (rootElement) {
     updateInstallButton();
     updateConnectionStatus();
     confettiBurst();
+
+    rootElement.querySelectorAll<HTMLButtonElement>('[data-theme]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const nextTheme = button.dataset.theme as ThemeName;
+        if (!nextTheme) return;
+        selectedTheme = nextTheme;
+        render();
+      });
+    });
 
     rootElement.querySelectorAll<HTMLButtonElement>('[data-section]').forEach((button) => {
       button.addEventListener('click', () => {
