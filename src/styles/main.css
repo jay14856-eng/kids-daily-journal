@@ -37,6 +37,53 @@ textarea {
     margin-bottom: 18px;
 }
 
+.reward-panel {
+    background: linear-gradient(135deg, #fff0b8 0%, #f9d8ff 100%);
+    border-color: rgba(183, 126, 227, 0.2);
+}
+
+.reward-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.reward-label {
+    margin: 0 0 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8b639e;
+}
+
+.reward-header h2 {
+    margin: 0;
+    font-size: clamp(1.4rem, 2vw, 2rem);
+    color: #523a7d;
+}
+
+.star-jar {
+    display: flex;
+    gap: 6px;
+    font-size: 1.5rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 999px;
+    padding: 10px 14px;
+}
+
+.reward-footer {
+    margin-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #564377;
+}
+
 .install-btn,
 .status-badge {
     display: inline-flex;

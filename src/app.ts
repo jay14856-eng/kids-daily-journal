@@ -81,6 +81,22 @@ const getToday = () => new Date().toLocaleDateString(undefined, {
   year: 'numeric'
 });
 
+const getProgressSummary = (count: number) => {
+  if (count === 0) {
+    return { title: 'Sparkle Starter', badge: '🌟', stars: ['☆', '☆', '☆', '☆', '☆'] };
+  }
+
+  if (count < 3) {
+    return { title: 'Happy Explorer', badge: '🚀', stars: ['⭐', '⭐', '☆', '☆', '☆'] };
+  }
+
+  if (count < 6) {
+    return { title: 'Super Star', badge: '🏆', stars: ['⭐', '⭐', '⭐', '☆', '☆'] };
+  }
+
+  return { title: 'Journal Hero', badge: '👑', stars: ['⭐', '⭐', '⭐', '⭐', '⭐'] };
+};
+
 const rootElement = document.getElementById('root');
 
 if (rootElement) {
@@ -130,6 +146,23 @@ if (rootElement) {
       `;
     }).join('');
 
+    const reward = getProgressSummary(entries.length);
+    const rewardMarkup = `
+      <section class="panel reward-panel">
+        <div class="reward-header">
+          <div>
+            <p class="reward-label">Your sticker level</p>
+            <h2>${reward.badge} ${escapeHtml(reward.title)}</h2>
+          </div>
+          <div class="star-jar">${reward.stars.map((star) => `<span>${star}</span>`).join('')}</div>
+        </div>
+        <div class="reward-footer">
+          <span>${entries.length} journal ${entries.length === 1 ? 'entry' : 'entries'}</span>
+          <span>Next goal: ${entries.length >= 6 ? 'You are a superstar!' : `${6 - entries.length} more to win 👑`}</span>
+        </div>
+      </section>
+    `;
+
     const formMarkup = selectedSection
       ? `
         <section class="panel prompt-panel">
@@ -174,6 +207,7 @@ if (rootElement) {
           <h1>🌞 My Daily Journal</h1>
         </header>
         <main class="content">
+          ${rewardMarkup}
           ${formMarkup}
           <section class="panel journal-panel">
             <h2>My Journal</h2>
