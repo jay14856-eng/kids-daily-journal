@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+// Note: Supabase is loaded from CDN in index.html via global window.supabase object
 
 type EntrySection = 'feelings' | 'best-moment' | 'thankful' | 'journal' | 'goal' | 'draw' | 'photos';
 type ThemeName = 'sunny' | 'garden' | 'space' | 'castle' | 'jungle' | 'pirate';
@@ -21,10 +21,10 @@ const DEVICE_ID_KEY = 'kids-daily-journal.device-id';
 const SYNC_KEY_STORAGE = 'kids-daily-journal.sync-key';
 const LAST_SYNC_KEY = 'kids-daily-journal.last-sync';
 
-// Supabase client
+// Supabase client - using global object loaded from CDN
 const supabaseUrl = 'https://guhgtuwhnlyfxtlrfjbh.supabase.co';
 const supabaseKey = 'sb_publishable_1iIPQEVSIhKxPeVTZNgqYg_fV2UKUmm';
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = (window as any).supabase.createClient(supabaseUrl, supabaseKey);
 
 // Device management
 const getOrCreateDeviceId = (): string => {
