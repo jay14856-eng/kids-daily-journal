@@ -5,8 +5,8 @@
 body {
     margin: 0;
     font-family: 'Arial', sans-serif;
-    background: linear-gradient(180deg, #fdf2d7 0%, #dff6ff 100%);
-    color: #1f2a44;
+    background: linear-gradient(180deg, #eaf9ff 0%, #fff7d7 100%);
+    color: #24314d;
 }
 
 button,
@@ -21,151 +21,257 @@ textarea {
 .app-shell {
     max-width: 980px;
     margin: 0 auto;
-    padding: 32px 20px 48px;
+    padding: 28px 20px 48px;
 }
 
 .topbar {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 28px;
-    flex-wrap: wrap;
+    text-align: center;
+    margin-bottom: 24px;
 }
 
-.badge {
-    background: #ffd166;
-    color: #4a2d00;
+.top-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.install-btn,
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 999px;
     padding: 8px 14px;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+}
+
+.install-btn {
+    border: none;
+    background: linear-gradient(135deg, #5ec7a8, #7ed8bd);
+    color: white;
+    cursor: pointer;
+}
+
+.status-badge {
+    background: #edf7ff;
+    color: #2e5fa5;
+}
+
+.status-badge.offline {
+    background: #fff1ee;
+    color: #ad5d4d;
+}
+
+.welcome-tag {
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ff8d7d;
 }
 
 h1 {
     margin: 0;
-    font-size: clamp(2.2rem, 5vw, 3.5rem);
-    color: #2f6fed;
+    font-size: clamp(2.2rem, 6vw, 3.6rem);
+    color: #2a6fe4;
 }
 
-.layout {
+.content {
     display: grid;
-    grid-template-columns: 1.1fr 1fr;
     gap: 24px;
 }
 
 .panel {
-    background: rgba(255, 255, 255, 0.9);
-    border: 2px solid rgba(76, 120, 247, 0.18);
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 10px 28px rgba(45, 68, 124, 0.08);
+    background: rgba(255, 255, 255, 0.92);
+    border: 2px solid rgba(82, 125, 224, 0.14);
+    border-radius: 22px;
+    padding: 22px;
+    box-shadow: 0 10px 24px rgba(76, 92, 139, 0.08);
 }
 
-.panel h2 {
+.menu-panel h2,
+.prompt-panel h2,
+.journal-panel h2 {
     margin-top: 0;
-    font-size: 1.6rem;
+    margin-bottom: 16px;
+    font-size: clamp(1.5rem, 3vw, 2rem);
     color: #2d4d9c;
 }
 
-.prompt-card {
-    background: #edf7ff;
-    border: 2px solid #bfe0ff;
-    border-radius: 16px;
-    padding: 18px;
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+    gap: 16px;
 }
 
-.prompt-card h2 {
-    margin: 0 0 14px;
-    font-size: 1.2rem;
-}
-
-.prompt-card form {
+.menu-card {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-}
-
-.prompt-card textarea {
-    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     min-height: 120px;
-    resize: vertical;
-    border: 2px solid #c7dcff;
-    border-radius: 12px;
-    padding: 12px 14px;
-    background: white;
-}
-
-.prompt-card button,
-.delete-btn {
     border: none;
-    border-radius: 12px;
-    padding: 10px 16px;
+    border-radius: 20px;
+    font-size: 1.05rem;
     font-weight: 700;
-    color: white;
-    background: linear-gradient(135deg, #4a90e2, #6db9ff);
+    color: #1f2d4d;
     cursor: pointer;
+    box-shadow: 0 8px 18px rgba(43, 66, 117, 0.08);
     transition: transform 0.15s ease;
 }
 
-.prompt-card button:hover,
-.delete-btn:hover {
-    transform: translateY(-1px);
+.menu-card:hover {
+    transform: translateY(-2px);
 }
 
-.entry-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.card-emoji {
+    font-size: 2rem;
+}
+
+.feelings { background: #ffdce9; }
+.best-moment { background: #fff2a8; }
+.thankful { background: #d9f5d0; }
+.journal { background: #dfe9ff; }
+.goal { background: #f3d9ff; }
+.draw { background: #ffe0b2; }
+
+.section-label {
+    display: inline-block;
+    background: #fff2b8;
+    color: #4d3b00;
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.prompt-panel form {
     display: flex;
     flex-direction: column;
     gap: 14px;
 }
 
+.prompt-panel textarea {
+    width: 100%;
+    min-height: 140px;
+    padding: 14px 16px;
+    border: 2px solid #d7def7;
+    border-radius: 14px;
+    background: #fff;
+    resize: vertical;
+}
+
+.prompt-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+button,
+.delete-btn {
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.prompt-panel button,
+.prompt-panel .secondary-btn {
+    padding: 10px 18px;
+}
+
+.prompt-panel button {
+    background: linear-gradient(135deg, #4a90e2, #71b8ff);
+    color: white;
+}
+
+.secondary-btn {
+    background: #f0f4ff;
+    color: #2d4d9c;
+}
+
+.entry-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 0;
+    margin: 0;
+}
+
 .entry-card {
     background: #fffaf1;
-    border: 2px solid #f4d587;
-    border-radius: 14px;
+    border: 2px solid #f5d89d;
+    border-radius: 16px;
     padding: 14px 16px;
 }
 
 .entry-header {
     display: flex;
+    gap: 12px;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+.entry-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #eef7ff;
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #3558a8;
 }
 
 .entry-date {
-    font-size: 0.84rem;
+    font-size: 0.8rem;
+    color: #5f6d93;
     font-weight: 700;
-    color: #5c6c90;
+}
+
+.entry-card p {
+    margin: 0 0 12px;
+    font-size: 1rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
 }
 
 .delete-btn {
-    padding: 6px 12px;
-    background: #ff7f7f;
-    font-size: 0.85rem;
+    background: #ff8f8f;
+    color: white;
+    padding: 7px 12px;
+    font-size: 0.82rem;
 }
 
 .empty-state {
     margin: 0;
-    color: #5f6f94;
-    background: #f2f7ff;
-    border: 1px dashed #b5c9ef;
+    background: #f2f8ff;
+    color: #586a94;
+    border: 1px dashed #bfd0f5;
     border-radius: 12px;
     padding: 18px;
 }
 
 @media (max-width: 760px) {
-    .layout {
+    .top-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .menu-grid {
         grid-template-columns: 1fr;
     }
 
-    .entry-header {
-        align-items: flex-start;
+    .entry-header,
+    .prompt-actions {
         flex-direction: column;
+        align-items: flex-start;
     }
 }

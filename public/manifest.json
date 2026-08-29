@@ -1,21 +1,25 @@
 {
   "name": "Kids Daily Journal",
   "short_name": "Journal",
-  "start_url": "/",
+  "start_url": ".",
+  "scope": ".",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4CAF50",
-  "description": "A daily journal app for kids to express their thoughts and feelings.",
+  "background_color": "#eaf9ff",
+  "theme_color": "#7cc7ff",
+  "description": "A cheerful daily journal app for kids to write, reflect, and dream.",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "icon-192x192.png",
+      "src": "./icon-192.svg",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
-      "src": "icon-512x512.png",
+      "src": "./icon-512.svg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }
