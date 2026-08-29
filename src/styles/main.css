@@ -84,6 +84,67 @@ textarea {
     color: #564377;
 }
 
+.treasure-box {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(80px, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.sticker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 92px;
+    border-radius: 18px;
+    padding: 10px 8px;
+    font-weight: 700;
+    border: 2px solid rgba(98, 118, 181, 0.14);
+    background: rgba(255, 255, 255, 0.45);
+}
+
+.sticker span {
+    font-size: 1.8rem;
+}
+
+.sticker small {
+    text-align: center;
+    font-size: 0.72rem;
+    line-height: 1.2;
+}
+
+.sticker.unlocked {
+    background: linear-gradient(135deg, #fff7a9, #ffd9ef);
+    box-shadow: 0 10px 16px rgba(241, 184, 37, 0.18);
+}
+
+.sticker.locked {
+    filter: grayscale(1);
+    opacity: 0.55;
+}
+
+#root.burst::before,
+#root.burst::after {
+    content: '✨ ✨ ✨ ✨ ✨';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    padding-top: 10vh;
+    font-size: clamp(1.2rem, 2vw, 2rem);
+    animation: sparkle 0.7s ease-out;
+}
+
+@keyframes sparkle {
+    0% { opacity: 0; transform: translateY(-20px) scale(0.8); }
+    25% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(10px) scale(1.1); }
+}
+
 .install-btn,
 .status-badge {
     display: inline-flex;

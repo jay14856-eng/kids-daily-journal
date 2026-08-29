@@ -97,6 +97,19 @@ const getProgressSummary = (count: number) => {
   return { title: 'Journal Hero', badge: '👑', stars: ['⭐', '⭐', '⭐', '⭐', '⭐'] };
 };
 
+const getStickerCollection = (entries: JournalEntryRecord[]) => {
+  const badges = [
+    { icon: '🌞', label: 'Sunshine', unlocked: entries.length >= 1 },
+    { icon: '🎈', label: 'Party Pop', unlocked: entries.length >= 2 },
+    { icon: '🧁', label: 'Treat Time', unlocked: entries.length >= 3 },
+    { icon: '🎁', label: 'Treasure Box', unlocked: entries.length >= 4 },
+    { icon: '🌈', label: 'Rainbow', unlocked: entries.length >= 5 },
+    { icon: '👑', label: 'Champion', unlocked: entries.length >= 6 }
+  ];
+
+  return badges;
+};
+
 const rootElement = document.getElementById('root');
 
 if (rootElement) {
@@ -147,6 +160,7 @@ if (rootElement) {
     }).join('');
 
     const reward = getProgressSummary(entries.length);
+    const stickerCollection = getStickerCollection(entries);
     const rewardMarkup = `
       <section class="panel reward-panel">
         <div class="reward-header">
@@ -159,6 +173,14 @@ if (rootElement) {
         <div class="reward-footer">
           <span>${entries.length} journal ${entries.length === 1 ? 'entry' : 'entries'}</span>
           <span>Next goal: ${entries.length >= 6 ? 'You are a superstar!' : `${6 - entries.length} more to win 👑`}</span>
+        </div>
+        <div class="treasure-box">
+          ${stickerCollection.map((sticker) => `
+            <div class="sticker ${sticker.unlocked ? 'unlocked' : 'locked'}" title="${sticker.label}">
+              <span>${sticker.icon}</span>
+              <small>${sticker.label}</small>
+            </div>
+          `).join('')}
         </div>
       </section>
     `;
@@ -227,8 +249,19 @@ if (rootElement) {
       updateInstallButton();
     });
 
+    const confettiBurst = () => {
+      const root = document.getElementById('root');
+      if (!root) return;
+
+      root.classList.remove('burst');
+      void root.offsetWidth;
+      root.classList.add('burst');
+      window.setTimeout(() => root.classList.remove('burst'), 700);
+    };
+
     updateInstallButton();
     updateConnectionStatus();
+    confettiBurst();
 
     rootElement.querySelectorAll<HTMLButtonElement>('[data-section]').forEach((button) => {
       button.addEventListener('click', () => {
