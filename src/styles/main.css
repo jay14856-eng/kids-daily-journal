@@ -1,46 +1,171 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f9f9f9;
-    color: #333;
     margin: 0;
-    padding: 20px;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(180deg, #fdf2d7 0%, #dff6ff 100%);
+    color: #1f2a44;
+}
+
+button,
+textarea {
+    font: inherit;
+}
+
+#root {
+    min-height: 100vh;
+}
+
+.app-shell {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 32px 20px 48px;
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+}
+
+.badge {
+    background: #ffd166;
+    color: #4a2d00;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 h1 {
-    font-size: 2.5em;
-    color: #4a90e2;
+    margin: 0;
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    color: #2f6fed;
 }
 
-h2 {
-    font-size: 2em;
-    color: #333;
+.layout {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 24px;
 }
 
-.journal-entry {
-    background-color: #ffffff;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 15px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+.panel {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(76, 120, 247, 0.18);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 10px 28px rgba(45, 68, 124, 0.08);
+}
+
+.panel h2 {
+    margin-top: 0;
+    font-size: 1.6rem;
+    color: #2d4d9c;
 }
 
 .prompt-card {
-    background-color: #e7f3fe;
-    border-left: 5px solid #4a90e2;
-    padding: 10px;
-    margin: 20px 0;
+    background: #edf7ff;
+    border: 2px solid #bfe0ff;
+    border-radius: 16px;
+    padding: 18px;
 }
 
-button {
-    background-color: #4a90e2;
-    color: white;
+.prompt-card h2 {
+    margin: 0 0 14px;
+    font-size: 1.2rem;
+}
+
+.prompt-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.prompt-card textarea {
+    width: 100%;
+    min-height: 120px;
+    resize: vertical;
+    border: 2px solid #c7dcff;
+    border-radius: 12px;
+    padding: 12px 14px;
+    background: white;
+}
+
+.prompt-card button,
+.delete-btn {
     border: none;
-    border-radius: 5px;
-    padding: 10px 15px;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(135deg, #4a90e2, #6db9ff);
     cursor: pointer;
+    transition: transform 0.15s ease;
 }
 
-button:hover {
-    background-color: #357ab8;
+.prompt-card button:hover,
+.delete-btn:hover {
+    transform: translateY(-1px);
+}
+
+.entry-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.entry-card {
+    background: #fffaf1;
+    border: 2px solid #f4d587;
+    border-radius: 14px;
+    padding: 14px 16px;
+}
+
+.entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.entry-date {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #5c6c90;
+}
+
+.delete-btn {
+    padding: 6px 12px;
+    background: #ff7f7f;
+    font-size: 0.85rem;
+}
+
+.empty-state {
+    margin: 0;
+    color: #5f6f94;
+    background: #f2f7ff;
+    border: 1px dashed #b5c9ef;
+    border-radius: 12px;
+    padding: 18px;
+}
+
+@media (max-width: 760px) {
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+    .entry-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
 }
