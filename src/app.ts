@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-type EntrySection = 'feelings' | 'best-moment' | 'thankful' | 'journal' | 'goal' | 'draw';
+type EntrySection = 'feelings' | 'best-moment' | 'thankful' | 'journal' | 'goal' | 'draw' | 'photos';
 type ThemeName = 'sunny' | 'garden' | 'space' | 'castle' | 'jungle' | 'pirate';
 
 type JournalEntryRecord = {
@@ -8,6 +8,7 @@ type JournalEntryRecord = {
   date: string;
   content: string;
   section: EntrySection;
+  photos?: string[]; // base64 encoded images
 };
 
 type BeforeInstallPromptEvent = Event & {
@@ -158,6 +159,12 @@ const SECTION_COPY: Record<EntrySection, { label: string; emoji: string; prompt:
     emoji: '🎨',
     prompt: 'Draw your favorite part of the day.',
     placeholder: 'You can also write a quick note here...'
+  },
+  photos: {
+    label: 'My Photos',
+    emoji: '📸',
+    prompt: 'Add photos from your day!',
+    placeholder: 'Tap to add photos from your camera or library'
   }
 };
 
@@ -184,6 +191,66 @@ const writeEntries = (entries: JournalEntryRecord[]) => {
   syncToSupabase(entries).catch(() => {
     // Silently fail - offline mode is fine
   });
+};
+
+// Photo handling
+const compressImage = async (file: File, maxWidth: number = 800, maxHeight: number = 800, quality: number = 0.7): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error('Failed to get canvas context'));
+        
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = event.target?.result as string;
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
+};
+
+const addPhotoToEntry = (entryId: string, photoBase64: string) => {
+  const entries = readEntries();
+  const entry = entries.find((e) => e.id === entryId);
+  if (!entry) return;
+  
+  if (!entry.photos) {
+    entry.photos = [];
+  }
+  entry.photos.push(photoBase64);
+  writeEntries(entries);
+};
+
+const removePhotoFromEntry = (entryId: string, photoIndex: number) => {
+  const entries = readEntries();
+  const entry = entries.find((e) => e.id === entryId);
+  if (!entry || !entry.photos) return;
+  
+  entry.photos.splice(photoIndex, 1);
+  writeEntries(entries);
 };
 
 const getToday = () => new Date().toLocaleDateString(undefined, {
@@ -299,7 +366,26 @@ if (rootElement) {
     `;
 
     const formMarkup = selectedSection
-      ? `
+      ? selectedSection === 'photos'
+        ? `
+        <section class="panel prompt-panel">
+          <div class="section-label">${SECTION_COPY[selectedSection].emoji} ${escapeHtml(SECTION_COPY[selectedSection].label)}</div>
+          <h2>${escapeHtml(SECTION_COPY[selectedSection].prompt)}</h2>
+          <form id="journal-form">
+            <div id="photo-upload-area" class="photo-upload-area">
+              <input type="file" id="photo-input" accept="image/*" multiple hidden />
+              <button type="button" id="photo-picker-btn" class="photo-picker-btn">📱 Pick from Library</button>
+              <p class="photo-hint">Tap to select photos or take a new one</p>
+            </div>
+            <div id="photo-preview" class="photo-preview"></div>
+            <div class="prompt-actions">
+              <button type="button" class="secondary-btn" id="back-to-menu">Back</button>
+              <button type="submit">Save</button>
+            </div>
+          </form>
+        </section>
+      `
+        : `
         <section class="panel prompt-panel">
           <div class="section-label">${SECTION_COPY[selectedSection].emoji} ${escapeHtml(SECTION_COPY[selectedSection].label)}</div>
           <h2>${escapeHtml(SECTION_COPY[selectedSection].prompt)}</h2>
@@ -321,15 +407,26 @@ if (rootElement) {
 
     const entryMarkup = entries.length === 0
       ? '<p class="empty-state">No entries yet. Start writing!</p>'
-      : `<ul class="entry-list">${entries.map((entry) => `
+      : `<ul class="entry-list">${entries.map((entry) => {
+          const photoGallery = entry.photos && entry.photos.length > 0
+            ? `<div class="entry-photos">${entry.photos
+                .map(
+                  (photo, idx) => `<img src="${photo}" alt="Photo ${idx + 1}" class="entry-photo" />`
+                )
+                .join('')}</div>`
+            : '';
+          
+          return `
           <li class="entry-card">
             <div class="entry-header">
               <span class="entry-badge">${SECTION_COPY[entry.section].emoji} ${escapeHtml(SECTION_COPY[entry.section].label)}</span>
               <span class="entry-date">${escapeHtml(entry.date)}</span>
             </div>
-            <p>${escapeHtml(entry.content)}</p>
+            ${entry.content ? `<p>${escapeHtml(entry.content)}</p>` : ''}
+            ${photoGallery}
             <button type="button" class="delete-btn" data-entry-id="${entry.id}">Delete</button>
-          </li>`).join('')}</ul>`;
+          </li>`;
+        }).join('')}</ul>`;
 
     const themeCards = (Object.keys(THEME_COPY) as ThemeName[]).map((themeKey) => `
       <button type="button" class="theme-card ${selectedTheme === themeKey ? 'active' : ''}" data-theme="${themeKey}">
@@ -488,26 +585,101 @@ if (rootElement) {
       render();
     });
 
+    // Photo picker button
+    const photoPickerBtn = document.getElementById('photo-picker-btn');
+    const photoInput = document.getElementById('photo-input') as HTMLInputElement | null;
+    
+    photoPickerBtn?.addEventListener('click', () => {
+      photoInput?.click();
+    });
+
+    photoInput?.addEventListener('change', async () => {
+      if (!photoInput.files || photoInput.files.length === 0) return;
+
+      const photoPreview = document.getElementById('photo-preview');
+      if (!photoPreview) return;
+
+      photoPreview.innerHTML = '<p class="loading">Processing photos...</p>';
+
+      const photoPromises = Array.from(photoInput.files).map((file) => compressImage(file));
+
+      try {
+        const compressedPhotos = await Promise.all(photoPromises);
+        
+        // Store temporarily in a variable for form submission
+        (window as any).selectedPhotos = compressedPhotos;
+
+        // Show preview
+        const previewHtml = compressedPhotos
+          .map(
+            (photo, index) => `
+          <div class="photo-thumbnail-container">
+            <img src="${photo}" alt="Photo ${index + 1}" class="photo-thumbnail" />
+            <button type="button" class="remove-photo-btn" data-photo-index="${index}">✕</button>
+          </div>
+        `
+          )
+          .join('');
+
+        photoPreview.innerHTML = `<div class="photo-gallery">${previewHtml}</div>`;
+
+        // Add remove button listeners
+        photoPreview.querySelectorAll<HTMLButtonElement>('.remove-photo-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const index = parseInt(btn.dataset.photoIndex || '0', 10);
+            (window as any).selectedPhotos.splice(index, 1);
+            photoInput.value = '';
+            photoInput.click(); // Re-trigger to show updated preview
+          });
+        });
+      } catch (error) {
+        console.error('Failed to process photos:', error);
+        photoPreview.innerHTML = '<p class="error">Failed to load photos. Please try again.</p>';
+      }
+    });
+
     document.getElementById('journal-form')?.addEventListener('submit', (event) => {
       event.preventDefault();
 
       if (!selectedSection) return;
 
-      const responseElement = document.getElementById('journal-response') as HTMLTextAreaElement;
-      const content = responseElement.value.trim();
-      if (!content) return;
+      if (selectedSection === 'photos') {
+        const selectedPhotos = (window as any).selectedPhotos || [];
+        if (selectedPhotos.length === 0) {
+          alert('Please select at least one photo');
+          return;
+        }
 
-      const nextEntry: JournalEntryRecord = {
-        id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}`,
-        date: getToday(),
-        content,
-        section: selectedSection
-      };
+        const nextEntry: JournalEntryRecord = {
+          id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}`,
+          date: getToday(),
+          content: '',
+          section: selectedSection,
+          photos: selectedPhotos
+        };
 
-      entries = [nextEntry, ...entries];
-      writeEntries(entries);
-      selectedSection = null;
-      render();
+        entries = [nextEntry, ...entries];
+        writeEntries(entries);
+        (window as any).selectedPhotos = [];
+        selectedSection = null;
+        render();
+      } else {
+        const responseElement = document.getElementById('journal-response') as HTMLTextAreaElement;
+        const content = responseElement.value.trim();
+        if (!content) return;
+
+        const nextEntry: JournalEntryRecord = {
+          id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}`,
+          date: getToday(),
+          content,
+          section: selectedSection
+        };
+
+        entries = [nextEntry, ...entries];
+        writeEntries(entries);
+        selectedSection = null;
+        render();
+      }
     });
 
     rootElement.querySelectorAll<HTMLButtonElement>('[data-entry-id]').forEach((button) => {
