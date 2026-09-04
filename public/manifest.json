@@ -1,13 +1,15 @@
 {
+  "id": "/",
   "name": "Kids Daily Journal",
   "short_name": "Journal",
-  "start_url": ".",
-  "scope": ".",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#eaf9ff",
   "theme_color": "#7cc7ff",
   "description": "A cheerful daily journal app for kids to write, reflect, and dream.",
   "orientation": "portrait",
+  "categories": ["lifestyle", "education", "kids"],
   "icons": [
     {
       "src": "./icon-192.svg",
@@ -21,5 +23,30 @@
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Draw My Day",
+      "short_name": "Draw",
+      "description": "Create a drawing for today",
+      "url": "./#draw",
+      "icons": [{ "src": "./icon-192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "How I Feel",
+      "short_name": "Feelings",
+      "description": "Record your mood today",
+      "url": "./#feelings",
+      "icons": [{ "src": "./icon-192.svg", "sizes": "192x192" }]
+    }
+  ],
+  "share_target": {
+    "action": "./#photos",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }
